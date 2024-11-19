@@ -1,72 +1,36 @@
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBB5SvT1nvmUxR2E26pfcJ9yBzpL0VfBBM",
-  authDomain: "wordpress-7d715.firebaseapp.com",
-  projectId: "wordpress-7d715",
-  storageBucket: "wordpress-7d715.firebasestorage.app",
-  messagingSenderId: "825792468964",
-  appId: "1:825792468964:web:02e8183833e34424f699f1",
-  measurementId: "G-HCB0DYTB59"
-};
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js";
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-
-// Retrieve Firebase Messaging
-const messaging = firebase.messaging();
+// Initialize Firebase Messaging
+const messaging = getMessaging();
 
 // Request permission for notifications
-function requestPermission() {
-  console.log('Requesting permission...');
-  Notification.requestPermission()
-    .then((permission) => {
-      if (permission === 'granted') {
-        console.log('Notification permission granted.');
-        getToken();
-      } else {
-        console.log('Unable to get permission.');
-      }
-    });
-}
+Notification.requestPermission()
+  .then((permission) => {
+    if (permission === "granted") {
+      console.log("Notification permission granted.");
+      // Get FCM token with VAPID key
+      getToken(messaging, {
+        vapidKey: "BK_UUPiZwvmHO_PAkBWBt5VQdpaOPu1e8950c-SXIyBf_vPIYgeWQsg0N9J8Wr3dByV8Ij8lnHksvie0mgbUeV0",
+      })
+        .then((currentToken) => {
+          if (currentToken) {
+            console.log("FCM Token:", currentToken);
+          } else {
+            console.error("No registration token available. Request permission to generate one.");
+          }
+        })
+        .catch((err) => {
+          console.error("An error occurred while retrieving token.", err);
+        });
+    } else {
+      console.error("Unable to get permission to notify.");
+    }
+  })
+  .catch((error) => {
+    console.error("Notification permission error:", error);
+  });
 
-// Get FCM Token
-function getToken() {
-  messaging.getToken({ vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' })
-    .then((currentToken) => {
-      if (currentToken) {
-        console.log('FCM Token:', currentToken);
-      } else {
-        console.log('No token available. Request permission again.');
-      }
-    })
-    .catch((err) => {
-      console.error('An error occurred while retrieving token.', err);
-    });
-}
-
-// Subscribe button
-document.getElementById('subscribe').addEventListener('click', () => {
-  requestPermission();
-});
-
-// Unsubscribe button
-document.getElementById('unsubscribe').addEventListener('click', () => {
-  messaging.deleteToken()
-    .then(() => {
-      console.log('Token deleted.');
-    })
-    .catch((err) => {
-      console.error('Unable to delete token.', err);
-    });
-});
-
-// Handle token refresh
-messaging.onTokenRefresh(() => {
-  messaging.getToken({ vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' })
-    .then((refreshedToken) => {
-      console.log('Token refreshed:', refreshedToken);
-    })
-    .catch((err) => {
-      console.error('Unable to retrieve refreshed token.', err);
-    });
+// Handle incoming messages
+onMessage(messaging, (payload) => {
+  console.log("Message received. ", payload);
 });
