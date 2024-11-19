@@ -1,7 +1,7 @@
 importScripts("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
 importScripts("https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js");
 
-// Firebase configuration
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBB5SvT1nvmUxR2E26pfcJ9yBzpL0VfBBM",
   authDomain: "wordpress-7d715.firebaseapp.com",
@@ -12,16 +12,19 @@ const firebaseConfig = {
   measurementId: "G-HCB0DYTB59",
 };
 
-// Initialize Firebase
+// Firebase ऐप को इनिशियलाइज़ करें
 firebase.initializeApp(firebaseConfig);
 
-// Retrieve Firebase Messaging instance
+// मैसेजिंग प्राप्त करें
 const messaging = firebase.messaging();
 
-// Background message handler
+// बैकग्राउंड मैसेज हैंडलर
 messaging.onBackgroundMessage((payload) => {
-  console.log("Received background message: ", payload);
-  self.registration.showNotification(payload.notification.title, {
+  console.log("बैकग्राउंड में मेसेज प्राप्त हुआ:", payload);
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
     body: payload.notification.body,
-  });
+    icon: "/firebase-logo.png",
+  };
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
