@@ -6,40 +6,43 @@
     <title>FCM Push Notification</title>
 </head>
 <body>
-    <h1>Firebase Cloud Messaging (FCM) Demo</h1>
-    <button id="subscribe">Subscribe for Notifications</button>
+    <h1>FCM Push Notification Demo</h1>
+    <button id="subscribe">Subscribe to Notifications</button>
 
-    <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 
     <script>
-        // Firebase Config
+        // Your Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBB5SvT1nvmUxR2E26pfcJ9yBzpL0VfBBM",
             authDomain: "wordpress-7d715.firebaseapp.com",
             projectId: "wordpress-7d715",
-            storageBucket: "wordpress-7d715.firebasestorage.app",
+            storageBucket: "wordpress-7d715.appspot.com",
             messagingSenderId: "825792468964",
             appId: "1:825792468964:web:02e8183833e34424f699f1",
             measurementId: "G-HCB0DYTB59"
         };
 
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
+
+        // Initialize Messaging
         const messaging = firebase.messaging();
 
-        // Request for Notification Permission
+        // Request Permission for Notifications
         document.getElementById('subscribe').addEventListener('click', () => {
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
-                    // Get FCM Token
-                    messaging.getToken().then(token => {
+                    messaging.getToken().then((token) => {
                         console.log("FCM Token:", token);
+                        alert("Token: " + token); // Display token for testing
                     }).catch((err) => {
                         console.error("Error retrieving token:", err);
                     });
                 } else {
-                    console.error("Notification permission denied");
+                    alert("Notification permission denied.");
                 }
             });
         });
