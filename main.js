@@ -12,59 +12,61 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Retrieve Firebase Messaging object
+// Retrieve Firebase Messaging
 const messaging = firebase.messaging();
 
-// Request notification permission
+// Request permission for notifications
 function requestPermission() {
   console.log('Requesting permission...');
-  Notification.requestPermission().then((permission) => {
-    if (permission === 'granted') {
-      console.log('Notification permission granted.');
-      getToken();
-    } else {
-      console.error('Unable to get permission to notify.');
-    }
-  });
+  Notification.requestPermission()
+    .then((permission) => {
+      if (permission === 'granted') {
+        console.log('Notification permission granted.');
+        getToken();
+      } else {
+        console.log('Unable to get permission.');
+      }
+    });
 }
 
-// Get FCM token
+// Get FCM Token
 function getToken() {
   messaging.getToken({ vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' })
     .then((currentToken) => {
       if (currentToken) {
         console.log('FCM Token:', currentToken);
       } else {
-        console.log('No registration token available. Request permission to generate one.');
+        console.log('No token available. Request permission again.');
       }
     })
-    .catch((error) => {
-      console.error('An error occurred while retrieving token.', error);
+    .catch((err) => {
+      console.error('An error occurred while retrieving token.', err);
     });
 }
+
+// Subscribe button
+document.getElementById('subscribe').addEventListener('click', () => {
+  requestPermission();
+});
+
+// Unsubscribe button
+document.getElementById('unsubscribe').addEventListener('click', () => {
+  messaging.deleteToken()
+    .then(() => {
+      console.log('Token deleted.');
+    })
+    .catch((err) => {
+      console.error('Unable to delete token.', err);
+    });
+});
 
 // Handle token refresh
 messaging.onTokenRefresh(() => {
   messaging.getToken({ vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' })
     .then((refreshedToken) => {
-      console.log('Token refreshed.');
-      console.log('New token:', refreshedToken);
+      console.log('Token refreshed:', refreshedToken);
     })
-    .catch((error) => {
-      console.error('Unable to retrieve refreshed token', error);
+    .catch((err) => {
+      console.error('Unable to retrieve refreshed token.', err);
     });
-});
-
-// Handle subscription button click
-document.getElementById('subscribe').addEventListener('click', () => {
-  requestPermission();
-});
-
-// Handle unsubscribe button click
-document.getElementById('unsubscribe').addEventListener('click', () => {
-  messaging.deleteToken().then(() => {
-    console.log('Token deleted.');
-  }).catch((error) => {
-    console.error('Unable to delete token.', error);
-  });
 });
