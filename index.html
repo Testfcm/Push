@@ -1,48 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Push Notification Example</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Push Notification</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Push Notification Test</h1>
-    
-    <script>
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
-            // Register the service worker
-            navigator.serviceWorker.register('service-worker.js').then(function(registration) {
-                console.log('Service Worker registered with scope:', registration.scope);
+  <h1>Send Push Notification</h1>
+  <form id="pushForm">
+    <label for="title">Notification Title:</label><br>
+    <input type="text" id="title" name="title" required><br><br>
 
-                // Subscribe to push notifications
-                registration.pushManager.subscribe({ userVisibleOnly: true })
-                .then(function(subscription) {
-                    console.log('User subscribed:', subscription);
+    <label for="body">Notification Body:</label><br>
+    <input type="text" id="body" name="body" required><br><br>
 
-                    // Save the subscription object in localStorage or send to server
-                    localStorage.setItem('pushSubscription', JSON.stringify(subscription));
+    <button type="submit">Send Notification</button>
+  </form>
 
-                    // Optionally: Send the subscription to the server (using jQuery)
-                    $.ajax({
-                        url: 'send-push.php', // Endpoint to send push notification
-                        method: 'POST',
-                        data: JSON.stringify(subscription),
-                        contentType: 'application/json',
-                        success: function(response) {
-                            console.log('Push notification sent:', response);
-                        },
-                        error: function(error) {
-                            console.error('Error sending push notification:', error);
-                        }
-                    });
-                }).catch(function(error) {
-                    console.error('Failed to subscribe to push notifications:', error);
-                });
-            }).catch(function(error) {
-                console.log('Service Worker registration failed:', error);
-            });
-        }
-    </script>
+  <div id="response" style="margin-top: 20px; color: green;"></div>
+
+  <script>
+    $(document).ready(function () {
+      const apiKey = 'edc5eabf-a20c-4dd9-9202-3646240d1c85'; // Replace with your API key
+      const url = `https://push.techulus.com/api/v1/notify/${apiKey}`;
+
+      $('#pushForm').on('submit', function (e) {
+        e.preventDefault(); // Prevent form submission
+
+        // Get the values from the input fields
+        const title = $('#title').val();
+        const body = $('#body').val();
+
+        // Make the POST request using jQuery
+        $.ajax({
+          url: url,
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            title: title,
+            body: body
+          }),
+          success: function (response) {
+            $('#response').text('Notification sent successfully!');
+          },
+          error: function (xhr, status, error) {
+            $('#response').text('Failed to send notification: ' + error);
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>
