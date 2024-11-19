@@ -1,5 +1,5 @@
-// Import only Firebase Messaging
-importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js');
+importScripts("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js");
+importScripts("https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js");
 
 // Firebase configuration
 const firebaseConfig = {
@@ -9,24 +9,19 @@ const firebaseConfig = {
   storageBucket: "wordpress-7d715.firebasestorage.app",
   messagingSenderId: "825792468964",
   appId: "1:825792468964:web:02e8183833e34424f699f1",
-  measurementId: "G-HCB0DYTB59"
+  measurementId: "G-HCB0DYTB59",
 };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Retrieve messaging
+// Retrieve Firebase Messaging instance
 const messaging = firebase.messaging();
 
 // Background message handler
 messaging.onBackgroundMessage((payload) => {
-  console.log('Received background message:', payload);
-
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
+  console.log("Received background message: ", payload);
+  self.registration.showNotification(payload.notification.title, {
     body: payload.notification.body,
-    icon: payload.notification.icon,
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  });
 });
