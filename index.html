@@ -1,75 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Push Notification</title>
-
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging.js"></script>
-
-<link rel="manifest" href="/manifest.json">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push Notification Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<br />
+    <h1>Push Notification Test</h1>
+    
+    <script>
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            // Register the service worker
+            navigator.serviceWorker.register('service-worker.js').then(function(registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
 
-<center><h2>Hello World</h2></center>
+                // Subscribe to push notifications
+                registration.pushManager.subscribe({ userVisibleOnly: true })
+                .then(function(subscription) {
+                    console.log('User subscribed:', subscription);
 
-<!-- Web Push Notification -->
-<script>
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyBB5SvT1nvmUxR2E26pfcJ9yBzpL0VfBBM",
-    authDomain: "wordpress-7d715.firebaseapp.com",
-    databaseURL: "https://wordpress-7d715.firebaseio.com", // Ensure your database URL is correct
-    projectId: "wordpress-7d715",
-    storageBucket: "wordpress-7d715.appspot.com",
-    messagingSenderId: "825792468964",
-    appId: "1:825792468964:web:02e8183833e34424f699f1",
-    measurementId: "G-HCB0DYTB59"
-};
+                    // Save the subscription object in localStorage or send to server
+                    localStorage.setItem('pushSubscription', JSON.stringify(subscription));
 
-// Initialize Firebase
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, requestPermission } from "firebase/messaging";
-
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
-
-// Request permission for notifications
-messaging.requestPermission()
-    .then(() => {
-        // Get the FCM token
-        return getToken(messaging, { vapidKey: "BK_UUPiZwvmHO_PAkBWBt5VQdpaOPu1e8950c-SXIyBf_vPIYgeWQsg0N9J8Wr3dByV8Ij8lnHksvie0mgbUeV0" });
-    })
-    .then((token) => {
-        // If a token is received, send it to your server
-        if (token) {
-            console.log('FCM Token:', token);
-            fetch('https://phpnot-97be7.firebaseio.com/pushtokens/' + token + '.json', {
-                method: 'PUT',
-                body: JSON.stringify(true),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }).then(response => {
-                console.log('Token saved:', response);
-            }).catch(error => {
-                console.error('Error saving token:', error);
+                    // Optionally: Send the subscription to the server (using jQuery)
+                    $.ajax({
+                        url: 'send-push.php', // Endpoint to send push notification
+                        method: 'POST',
+                        data: JSON.stringify(subscription),
+                        contentType: 'application/json',
+                        success: function(response) {
+                            console.log('Push notification sent:', response);
+                        },
+                        error: function(error) {
+                            console.error('Error sending push notification:', error);
+                        }
+                    });
+                }).catch(function(error) {
+                    console.error('Failed to subscribe to push notifications:', error);
+                });
+            }).catch(function(error) {
+                console.log('Service Worker registration failed:', error);
             });
         }
-    })
-    .catch((err) => {
-        console.error('Permission denied or error:', err);
-    });
-</script>
-
+    </script>
 </body>
 </html>
